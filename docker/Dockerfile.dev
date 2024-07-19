@@ -1,0 +1,41 @@
+FROM node:18
+# Forcer le faite d'utiliser les miroirs français quand on utilise apt ...
+# Attention, le chemin source est rélative à l'emplacement du fichier docker-compose
+COPY ./docker/sources.list /etc/apt/sources.list
+
+# Créer l'utilisateur et son groupe, installer des paquets
+RUN apt-get update \        
+    && apt-get install -y sudo \
+    && apt-get install -y less \
+    && apt-get install -y mycli \
+    && apt-get install -y tzdata \    
+    && npm install -g typescript \
+    && npm install -g ts-node \
+    && apt-get install -y apt-transport-https \
+    && apt-get install -y  ca-certificates \
+    && apt-get install -y curl
+
+RUN \
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
+  && echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list \
+  && apt-get update \
+  && apt-get install -y kubectl
+  
+#RUN \ 
+#  mkdir -p /tmp/kubectl \
+#  && cd /tmp/kubectl \
+#  && curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+#  && curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256" \
+#  && echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check \
+#  && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  
+# Fixer le fuseau horaire
+ENV TZ Europe/Paris
+
+# L'interprète par défaut
+ENV SHELL /bin/bash
+
+# Le repertoire maison par défaut
+WORKDIR /home/dev
+
+RUN /bin/bash

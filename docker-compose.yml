@@ -1,0 +1,23 @@
+services:
+  api:
+    build: 
+      context: ./
+      dockerfile: ./docker/Dockerfile.prod
+    container_name: security-sample-api
+    ports:
+      - "5055:5055"
+    environment:
+      - NODE_ENV=prod
+      - PORT=5055
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}          
+    restart: always
+    networks:
+      - sgbdr-network-prod
+      
+networks:
+  sgbdr-network-prod:
+    driver: bridge
+    name: sgbdr-network-prod
